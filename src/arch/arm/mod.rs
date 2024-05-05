@@ -9,14 +9,16 @@
 /// - S (when used on its own) is the address of the symbol.
 /// - A is the addend for the relocation.
 /// - P is the address of the place being relocated (derived from r_offset).
-/// - Pa is the adjusted address of the place being relocated, defined as (P & 0xFFFFFFFC).
-/// - T is 1 if the target symbol S has type STT_FUNC and the symbol addresses a Thumb instruction;
-///   it is 0 otherwise.
-/// - B(S) is the addressing origin of the output segment defining the symbol S. The origin is
-///   not required to be the base address of the segment. This value must always be word-aligned.
-/// - GOT_ORG is the addressing origin of the Global Offset Table (the indirection table for imported
-///   data addresses). This value must always be word-aligned. See §4.6.1.8, Proxy generating
-///   relocations.
+/// - Pa is the adjusted address of the place being relocated, defined as (P &
+///   0xFFFFFFFC).
+/// - T is 1 if the target symbol S has type STT_FUNC and the symbol addresses a
+///   Thumb instruction; it is 0 otherwise.
+/// - B(S) is the addressing origin of the output segment defining the symbol S.
+///   The origin is not required to be the base address of the segment. This
+///   value must always be word-aligned.
+/// - GOT_ORG is the addressing origin of the Global Offset Table (the
+///   indirection table for imported data addresses). This value must always be
+///   word-aligned. See §4.6.1.8, Proxy generating relocations.
 /// - GOT(S) is the address of the GOT entry for the symbol S.
 #[derive(Eq, PartialEq, Debug, Clone, Copy)]
 #[allow(non_camel_case_types)]
@@ -86,11 +88,14 @@ pub enum RelocationTypes {
     R_ARM_THM_JUMP24,
     /// Static, Data, B(S) + A.
     R_ARM_BASE_ABS,
-    /// Obsolete, Note, – Legacy (ARM ELF B02) names have been retained for these obsolete relocations.
+    /// Obsolete, Note, – Legacy (ARM ELF B02) names have been retained for
+    /// these obsolete relocations.
     R_ARM_ALU_PCREL_7_0,
-    /// Obsolete, Note, – Legacy (ARM ELF B02) names have been retained for these obsolete relocations.
+    /// Obsolete, Note, – Legacy (ARM ELF B02) names have been retained for
+    /// these obsolete relocations.
     R_ARM_ALU_PCREL_15_8,
-    /// Obsolete, Note, – Legacy (ARM ELF B02) names have been retained for these obsolete relocations.
+    /// Obsolete, Note, – Legacy (ARM ELF B02) names have been retained for
+    /// these obsolete relocations.
     R_ARM_ALU_PCREL_23_15,
     /// Deprecated, ARM, S + A – B(S).
     R_ARM_LDR_SBREL_11_0_NC,

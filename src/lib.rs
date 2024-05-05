@@ -8,31 +8,30 @@ extern crate std;
 #[cfg(test)]
 extern crate env_logger;
 
+// re-export all of `xmas_elf`
+// `Flags` and `ProgramHeader` only because of their use in the `ElfLoader`
+// trait
+pub use xmas_elf::{
+    self,
+    program::{Flags, ProgramHeader},
+};
+
 mod binary;
 pub use binary::ElfBinary;
 
 pub mod arch;
 pub use arch::RelocationType;
 
-use core::fmt;
-use core::iter::Filter;
-
-use bitflags::bitflags;
-use xmas_elf::dynamic::*;
-use xmas_elf::program::ProgramIter;
-
-pub use xmas_elf::header::{Header, Machine};
-pub use xmas_elf::program::{Flags, ProgramHeader, ProgramHeader64};
-pub use xmas_elf::sections::{Rel, Rela};
-pub use xmas_elf::symbol_table::{Entry, Entry64};
-pub use xmas_elf::{P32, P64};
+use {
+    bitflags::bitflags,
+    core::fmt,
+    xmas_elf::{dynamic::*, header::Header},
+};
 
 /// Required alignment for zero-copy reads provided to xmas_elf by the
 /// zero crate.
 pub(crate) const ALIGNMENT: usize = core::mem::align_of::<Header>();
 
-/// An iterator over [`ProgramHeader`] whose type is `LOAD`.
-pub type LoadableHeaders<'a, 'b> = Filter<ProgramIter<'a, 'b>, fn(&ProgramHeader) -> bool>;
 pub type PAddr = u64;
 pub type VAddr = u64;
 
@@ -138,9 +137,9 @@ pub struct DynamicInfo {
 /// Implement this trait for customized ELF loading.
 ///
 /// The flow of ElfBinary is that it first calls `allocate` for all regions
-/// that need to be allocated (i.e., the LOAD program headers of the ELF binary),
-/// then `load` will be called to fill the allocated regions, and finally
-/// `relocate` is called for every entry in the RELA table.
+/// that need to be allocated (i.e., the LOAD program headers of the ELF
+/// binary), then `load` will be called to fill the allocated regions, and
+/// finally `relocate` is called for every entry in the RELA table.
 pub trait ElfLoader {
     /// Allocates a virtual region specified by `header`.
     fn allocate(&mut self, header: ProgramHeader) -> Result<(), ElfLoaderErr>;

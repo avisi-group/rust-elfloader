@@ -1,7 +1,7 @@
-use std::fs;
-
-use crate::arch::test::*;
-use crate::*;
+use {
+    crate::{arch::test::*, *},
+    std::fs,
+};
 
 #[test]
 fn load_pie_elf() {
@@ -20,17 +20,20 @@ fn load_pie_elf() {
 
     // View allocate/load actions with readelf -l [binary]
     // Program Headers:
-    // Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
-    // PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x0001f8 0x0001f8 R   0x8
-    // INTERP         0x000238 0x0000000000000238 0x0000000000000238 0x00001b 0x00001b R   0x1
-    // [Requesting program interpreter: /lib/ld-linux-aarch64.so.1]
-    // LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x0008cc 0x0008cc R E 0x10000
-    // LOAD           0x000d90 0x0000000000010d90 0x0000000000010d90 0x000280 0x000288 RW  0x10000
-    // DYNAMIC        0x000da0 0x0000000000010da0 0x0000000000010da0 0x0001f0 0x0001f0 RW  0x8
-    // NOTE           0x000254 0x0000000000000254 0x0000000000000254 0x000044 0x000044 R   0x4
-    // GNU_EH_FRAME   0x0007e4 0x00000000000007e4 0x00000000000007e4 0x00003c 0x00003c R   0x4
-    // GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0x10
-    // GNU_RELRO      0x000d90 0x0000000000010d90 0x0000000000010d90 0x000270 0x000270 R   0x1
+    // Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz
+    // Flg Align PHDR           0x000040 0x0000000000000040 0x0000000000000040
+    // 0x0001f8 0x0001f8 R   0x8 INTERP         0x000238 0x0000000000000238
+    // 0x0000000000000238 0x00001b 0x00001b R   0x1 [Requesting program
+    // interpreter: /lib/ld-linux-aarch64.so.1] LOAD           0x000000
+    // 0x0000000000000000 0x0000000000000000 0x0008cc 0x0008cc R E 0x10000 LOAD
+    // 0x000d90 0x0000000000010d90 0x0000000000010d90 0x000280 0x000288 RW  0x10000
+    // DYNAMIC        0x000da0 0x0000000000010da0 0x0000000000010da0 0x0001f0
+    // 0x0001f0 RW  0x8 NOTE           0x000254 0x0000000000000254
+    // 0x0000000000000254 0x000044 0x000044 R   0x4 GNU_EH_FRAME   0x0007e4
+    // 0x00000000000007e4 0x00000000000007e4 0x00003c 0x00003c R   0x4 GNU_STACK
+    // 0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0x10
+    // GNU_RELRO      0x000d90 0x0000000000010d90 0x0000000000010d90 0x000270
+    // 0x000270 R   0x1
     assert_eq!(
         loader.actions[0],
         LoaderAction::Allocate(VAddr::from(0x0u64), 0x8cc, Flags(1 | 4))
@@ -50,23 +53,30 @@ fn load_pie_elf() {
 
     // View relocation actions with readelf -r [binary]
     // Relocation section '.rela.dyn' at offset 0x480 contains 8 entries:
-    //     Offset             Info             Type               Symbol's Value  Symbol's Name + Addend
-    // 0000000000010d90  0000000000000403 R_AARCH64_RELATIVE                        750
-    // 0000000000010d98  0000000000000403 R_AARCH64_RELATIVE                        700
-    // 0000000000010ff0  0000000000000403 R_AARCH64_RELATIVE                        754
-    // 0000000000011008  0000000000000403 R_AARCH64_RELATIVE                        11008
-    // 0000000000010fd8  0000000400000401 R_AARCH64_GLOB_DAT     0000000000000000 _ITM_deregisterTMCloneTable + 0
-    // 0000000000010fe0  0000000500000401 R_AARCH64_GLOB_DAT     0000000000000000 __cxa_finalize@GLIBC_2.17 + 0
-    // 0000000000010fe8  0000000600000401 R_AARCH64_GLOB_DAT     0000000000000000 __gmon_start__ + 0
-    // 0000000000010ff8  0000000800000401 R_AARCH64_GLOB_DAT     0000000000000000 _ITM_registerTMCloneTable + 0
+    //     Offset             Info             Type               Symbol's Value
+    // Symbol's Name + Addend 0000000000010d90  0000000000000403
+    // R_AARCH64_RELATIVE                        750 0000000000010d98
+    // 0000000000000403 R_AARCH64_RELATIVE                        700
+    // 0000000000010ff0  0000000000000403 R_AARCH64_RELATIVE
+    // 754 0000000000011008  0000000000000403 R_AARCH64_RELATIVE
+    // 11008 0000000000010fd8  0000000400000401 R_AARCH64_GLOB_DAT
+    // 0000000000000000 _ITM_deregisterTMCloneTable + 0 0000000000010fe0
+    // 0000000500000401 R_AARCH64_GLOB_DAT     0000000000000000
+    // __cxa_finalize@GLIBC_2.17 + 0 0000000000010fe8  0000000600000401
+    // R_AARCH64_GLOB_DAT     0000000000000000 __gmon_start__ + 0
+    // 0000000000010ff8  0000000800000401 R_AARCH64_GLOB_DAT     0000000000000000
+    // _ITM_registerTMCloneTable + 0
     //
     // Relocation section '.rela.plt' at offset 0x540 contains 5 entries:
-    //     Offset             Info             Type               Symbol's Value  Symbol's Name + Addend
-    // 0000000000010fa8  0000000300000402 R_AARCH64_JUMP_SLOT    0000000000000000 __libc_start_main@GLIBC_2.34 + 0
-    // 0000000000010fb0  0000000500000402 R_AARCH64_JUMP_SLOT    0000000000000000 __cxa_finalize@GLIBC_2.17 + 0
-    // 0000000000010fb8  0000000600000402 R_AARCH64_JUMP_SLOT    0000000000000000 __gmon_start__ + 0
-    // 0000000000010fc0  0000000700000402 R_AARCH64_JUMP_SLOT    0000000000000000 abort@GLIBC_2.17 + 0
-    // 0000000000010fc8  0000000900000402 R_AARCH64_JUMP_SLOT    0000000000000000 printf@GLIBC_2.17 + 0
+    //     Offset             Info             Type               Symbol's Value
+    // Symbol's Name + Addend 0000000000010fa8  0000000300000402
+    // R_AARCH64_JUMP_SLOT    0000000000000000 __libc_start_main@GLIBC_2.34 + 0
+    // 0000000000010fb0  0000000500000402 R_AARCH64_JUMP_SLOT    0000000000000000
+    // __cxa_finalize@GLIBC_2.17 + 0 0000000000010fb8  0000000600000402
+    // R_AARCH64_JUMP_SLOT    0000000000000000 __gmon_start__ + 0
+    // 0000000000010fc0  0000000700000402 R_AARCH64_JUMP_SLOT    0000000000000000
+    // abort@GLIBC_2.17 + 0 0000000000010fc8  0000000900000402
+    // R_AARCH64_JUMP_SLOT    0000000000000000 printf@GLIBC_2.17 + 0
     assert_eq!(
         loader.actions[4],
         LoaderAction::Relocate(0x1000_0000 + 0x10d90, 0x1000_0750)

@@ -1,6 +1,8 @@
-use crate::*;
-use log::{info, trace};
-use std::vec::Vec;
+use {
+    crate::*,
+    log::{info, trace},
+    std::vec::Vec,
+};
 
 #[derive(Eq, Clone, PartialEq, Copy, Debug)]
 pub(crate) enum LoaderAction {
@@ -42,11 +44,13 @@ impl ElfLoader for TestLoader {
     }
 
     fn relocate(&mut self, entry: RelocationEntry) -> Result<(), ElfLoaderErr> {
-        use crate::arch::aarch64::RelocationTypes::*;
-        use crate::arch::riscv::RelocationTypes::*;
-        use crate::arch::x86::RelocationTypes::*;
-        use crate::arch::x86_64::RelocationTypes::*;
-        use RelocationType::{x86, x86_64, AArch64, RiscV};
+        use {
+            crate::arch::{
+                aarch64::RelocationTypes::*, riscv::RelocationTypes::*, x86::RelocationTypes::*,
+                x86_64::RelocationTypes::*,
+            },
+            RelocationType::{x86, x86_64, AArch64, RiscV},
+        };
 
         // Get the pointer to where the relocation happens in the
         // memory where we loaded the headers
@@ -55,7 +59,8 @@ impl ElfLoader for TestLoader {
         //
         // get_offset(): For an executable or shared object, the value indicates
         // the virtual address of the storage unit affected by the relocation.
-        // This information makes the relocation entries more useful for the runtime linker.
+        // This information makes the relocation entries more useful for the runtime
+        // linker.
         let addr: *mut u64 = (self.vbase + entry.offset) as *mut u64;
 
         match entry.rtype {

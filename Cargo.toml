@@ -1,6 +1,6 @@
 [package]
 name = "elfloader"
-version = "0.16.0"
+version = "0.17.0"
 authors = [
   "Gerd Zellweger <mail@gerdzellweger.com>",
   "Christopher Cole <chris.cole.09@gmail.com>",
@@ -14,7 +14,7 @@ license = "MIT/Apache-2.0"
 description = "A rust library to load ELF files."
 keywords = ["elf", "x86", "os"]
 readme = "README.md"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 log = { version = "0.4.21", optional = true }

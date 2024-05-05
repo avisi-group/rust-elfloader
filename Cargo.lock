@@ -74,7 +74,7 @@ checksum = "0b6a852b24ab71dffc585bcb46eaf7959d175cb865a7152e35b348d1b2960422"
 
 [[package]]
 name = "elfloader"
-version = "0.16.0"
+version = "0.17.0"
 dependencies = [
  "bitflags",
  "env_logger",

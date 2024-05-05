@@ -1,17 +1,20 @@
 #[cfg(log)]
 use log::*;
 
-pub use xmas_elf::symbol_table::Entry;
-
 use {
     crate::{DynamicFlags1, DynamicInfo, ElfLoader, ElfLoaderErr, RelocationEntry, RelocationType},
     core::fmt,
-    xmas_elf::dynamic::Tag,
-    xmas_elf::header,
-    xmas_elf::program::ProgramHeader::{self, Ph32, Ph64},
-    xmas_elf::program::{SegmentData, Type},
-    xmas_elf::sections::SectionData,
-    xmas_elf::ElfFile,
+    xmas_elf::{
+        dynamic::Tag,
+        header,
+        program::{
+            ProgramHeader::{self, Ph32, Ph64},
+            SegmentData, Type,
+        },
+        sections::SectionData,
+        symbol_table::Entry,
+        ElfFile,
+    },
 };
 
 /// Abstract representation of a loadable ELF binary.
@@ -59,10 +62,11 @@ impl<'s> ElfBinary<'s> {
         Ok(ElfBinary { file, dynamic })
     }
 
-    /// Returns true if the binary is compiled as position independent code or false otherwise.
+    /// Returns true if the binary is compiled as position independent code or
+    /// false otherwise.
     ///
-    /// For the binary to be PIE it needs to have a .dynamic section with PIE set in the flags1
-    /// field.
+    /// For the binary to be PIE it needs to have a .dynamic section with PIE
+    /// set in the flags1 field.
     pub fn is_pie(&self) -> bool {
         self.dynamic.as_ref().map_or(false, |d: &DynamicInfo| {
             d.flags1.contains(DynamicFlags1::PIE)
@@ -231,10 +235,12 @@ impl<'s> ElfBinary<'s> {
 
     /// Processes a dynamic header section.
     ///
-    /// This section contains mostly entry points to other section headers (like relocation).
-    /// At the moment this just does sanity checking for relocation later.
+    /// This section contains mostly entry points to other section headers (like
+    /// relocation). At the moment this just does sanity checking for
+    /// relocation later.
     ///
-    /// A human readable version of the dynamic section is best obtained with `readelf -d <binary>`.
+    /// A human readable version of the dynamic section is best obtained with
+    /// `readelf -d <binary>`.
     fn parse_dynamic<'a>(
         file: &ElfFile,
         dynamic_header: &'a ProgramHeader<'a>,
@@ -242,7 +248,8 @@ impl<'s> ElfBinary<'s> {
         #[cfg(log)]
         trace!("load dynamic segement {:?}", dynamic_header);
 
-        // Walk through the dynamic program header and find the rela and sym_tab section offsets:
+        // Walk through the dynamic program header and find the rela and sym_tab section
+        // offsets:
         let segment = dynamic_header.get_data(file)?;
 
         // Init result

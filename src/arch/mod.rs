@@ -1,4 +1,4 @@
-use crate::{ElfLoaderErr, Machine};
+use {crate::ElfLoaderErr, xmas_elf::header::Machine};
 
 pub mod aarch64;
 pub mod arm;

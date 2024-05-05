@@ -1,7 +1,7 @@
-use std::fs;
-
-use crate::arch::test::*;
-use crate::*;
+use {
+    crate::{arch::test::*, *},
+    std::fs,
+};
 
 #[test]
 fn load_pie_elf() {

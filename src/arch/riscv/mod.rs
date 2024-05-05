@@ -1,5 +1,4 @@
 //! RISCV relocation types
-//!
 
 #[cfg(test)]
 mod test;

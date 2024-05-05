@@ -52,6 +52,7 @@ pub enum ElfLoaderErr {
     ElfParser { source: &'static str },
     OutOfMemory,
     UnalignedMemory,
+    InvalidFlagsEntry,
     SymbolTableNotFound,
     UnsupportedElfFormat,
     UnsupportedElfVersion,
@@ -75,6 +76,9 @@ impl fmt::Display for ElfLoaderErr {
             ElfLoaderErr::ElfParser { source } => write!(f, "Error in ELF parser: {}", source),
             ElfLoaderErr::OutOfMemory => write!(f, "Out of memory"),
             ElfLoaderErr::UnalignedMemory => write!(f, "Data must be aligned to {:?}", ALIGNMENT),
+            ElfLoaderErr::InvalidFlagsEntry => {
+                write!(f, "Failed to parse dynamic flags from entry bits")
+            }
             ElfLoaderErr::SymbolTableNotFound => write!(f, "No symbol table in the ELF file"),
             ElfLoaderErr::UnsupportedElfFormat => write!(f, "ELF format not supported"),
             ElfLoaderErr::UnsupportedElfVersion => write!(f, "ELF version not supported"),
@@ -138,8 +142,8 @@ pub struct DynamicInfo {
 /// then `load` will be called to fill the allocated regions, and finally
 /// `relocate` is called for every entry in the RELA table.
 pub trait ElfLoader {
-    /// Allocates a virtual region specified by `load_headers`.
-    fn allocate(&mut self, load_headers: LoadableHeaders) -> Result<(), ElfLoaderErr>;
+    /// Allocates a virtual region specified by `header`.
+    fn allocate(&mut self, header: ProgramHeader) -> Result<(), ElfLoaderErr>;
 
     /// Copies `region` into memory starting at `base`.
     /// The caller makes sure that there was an `allocate` call previously

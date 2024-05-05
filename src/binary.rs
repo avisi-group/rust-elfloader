@@ -1,17 +1,18 @@
-use crate::{
-    DynamicFlags1, DynamicInfo, ElfLoader, ElfLoaderErr, LoadableHeaders, RelocationEntry,
-    RelocationType,
-};
-use core::fmt;
 #[cfg(log)]
 use log::*;
-use xmas_elf::dynamic::Tag;
-use xmas_elf::program::ProgramHeader::{self, Ph32, Ph64};
-use xmas_elf::program::{ProgramIter, SegmentData, Type};
-use xmas_elf::sections::SectionData;
-pub use xmas_elf::symbol_table::{Entry, Entry64};
-use xmas_elf::ElfFile;
-use xmas_elf::*;
+
+pub use xmas_elf::symbol_table::Entry;
+
+use {
+    crate::{DynamicFlags1, DynamicInfo, ElfLoader, ElfLoaderErr, RelocationEntry, RelocationType},
+    core::fmt,
+    xmas_elf::dynamic::Tag,
+    xmas_elf::header,
+    xmas_elf::program::ProgramHeader::{self, Ph32, Ph64},
+    xmas_elf::program::{SegmentData, Type},
+    xmas_elf::sections::SectionData,
+    xmas_elf::ElfFile,
+};
 
 /// Abstract representation of a loadable ELF binary.
 pub struct ElfBinary<'s> {
@@ -100,7 +101,7 @@ impl<'s> ElfBinary<'s> {
     }
 
     /// Create a slice of the program headers.
-    pub fn program_headers(&self) -> ProgramIter {
+    pub fn program_headers(&self) -> impl Iterator<Item = ProgramHeader> {
         self.file.program_iter()
     }
 
@@ -267,8 +268,8 @@ impl<'s> ElfBinary<'s> {
                     Tag::Rela => $info.rela = $entry.get_ptr()?.into(),
                     Tag::RelaSize => $info.rela_size = $entry.get_val()?.into(),
                     Tag::Flags1 => {
-                        $info.flags1 =
-                            unsafe { DynamicFlags1::from_bits_unchecked($entry.get_val()? as _) };
+                        $info.flags1 = DynamicFlags1::from_bits($entry.get_val()? as _)
+                            .ok_or(ElfLoaderErr::InvalidFlagsEntry)?;
                     }
                     _ => {
                         #[cfg(log)]
@@ -318,7 +319,8 @@ impl<'s> ElfBinary<'s> {
     pub fn load(&self, loader: &mut dyn ElfLoader) -> Result<(), ElfLoaderErr> {
         self.is_loadable()?;
 
-        loader.allocate(self.iter_loadable_headers())?;
+        self.iter_loadable_headers()
+            .try_for_each(|header| loader.allocate(header))?;
 
         // Load all headers
         for header in self.file.program_iter() {
@@ -360,7 +362,7 @@ impl<'s> ElfBinary<'s> {
         Ok(())
     }
 
-    fn iter_loadable_headers(&self) -> LoadableHeaders {
+    fn iter_loadable_headers(&self) -> impl Iterator<Item = ProgramHeader> {
         // Trying to determine loadeable headers
         fn select_load(pheader: &ProgramHeader) -> bool {
             match pheader {

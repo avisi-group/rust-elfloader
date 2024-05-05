@@ -24,21 +24,20 @@ impl TestLoader {
 }
 
 impl ElfLoader for TestLoader {
-    fn allocate(&mut self, load_headers: LoadableHeaders) -> Result<(), ElfLoaderErr> {
-        for header in load_headers {
-            info!(
-                "allocate base = {:#x} size = {:#x} flags = {}",
-                header.virtual_addr(),
-                header.mem_size(),
-                header.flags()
-            );
+    fn allocate(&mut self, header: ProgramHeader) -> Result<(), ElfLoaderErr> {
+        info!(
+            "allocate base = {:#x} size = {:#x} flags = {}",
+            header.virtual_addr(),
+            header.mem_size(),
+            header.flags()
+        );
 
-            self.actions.push(LoaderAction::Allocate(
-                header.virtual_addr(),
-                header.mem_size() as usize,
-                header.flags(),
-            ));
-        }
+        self.actions.push(LoaderAction::Allocate(
+            header.virtual_addr(),
+            header.mem_size() as usize,
+            header.flags(),
+        ));
+
         Ok(())
     }
 

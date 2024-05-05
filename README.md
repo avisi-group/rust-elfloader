@@ -21,15 +21,14 @@ struct ExampleLoader {
 }
 
 impl ElfLoader for ExampleLoader {
-    fn allocate(&mut self, load_headers: LoadableHeaders) -> Result<(), ElfLoaderErr> {
-        for header in load_headers {
-            info!(
-                "allocate base = {:#x} size = {:#x} flags = {}",
-                header.virtual_addr(),
-                header.mem_size(),
-                header.flags()
-            );
-        }
+    fn allocate(&mut self, header: ProgramHeader) -> Result<(), ElfLoaderErr> {
+        info!(
+            "allocate base = {:#x} size = {:#x} flags = {}",
+            header.virtual_addr(),
+            header.mem_size(),
+            header.flags()
+        );
+
         Ok(())
     }
 
